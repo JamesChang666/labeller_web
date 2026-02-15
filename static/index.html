@@ -1,0 +1,126 @@
+﻿<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Labeller Web</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <input id="projectPath" placeholder="Dataset folder path (server local path)" />
+    <button id="btnBrowseProject">Browse</button>
+    <select id="sourceMode">
+      <option value="images">Images Dataset</option>
+      <option value="yolo">YOLO Dataset</option>
+      <option value="rfdetr">RF-DETR Dataset</option>
+    </select>
+    <button id="btnOpen">Open Project</button>
+    <select id="splitSel"><option>train</option><option>val</option><option>test</option></select>
+    <div id="statusTop"></div>
+  </div>
+
+  <div class="layout">
+    <div class="canvas-wrap">
+      <canvas id="canvas" width="1280" height="720"></canvas>
+    </div>
+    <div class="side">
+      <div class="row">
+        <select id="imageSel"></select>
+      </div>
+
+      <div class="row3">
+        <button id="btnPrev">Previous</button>
+        <button class="primary" id="btnNext">Save + Next</button>
+        <button id="btnFuse">Fuse</button>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Class ID</label>
+          <input id="classId" type="number" min="0" value="0" />
+        </div>
+        <div>
+          <label>Confidence</label>
+          <input id="conf" type="number" step="0.05" value="0.5" />
+        </div>
+      </div>
+
+      <div class="row3">
+        <button id="btnUndo">Undo</button>
+        <button id="btnRedo">Redo</button>
+        <button id="btnDelete">Delete Box</button>
+      </div>
+      <div class="row">
+        <button id="btnClearAll">Clear All</button>
+      </div>
+
+      <div class="row">
+        <label><input id="chkPropagate" type="checkbox" style="width:auto;height:auto" /> Propagate</label>
+        <label><input id="chkAutoDetect" type="checkbox" style="width:auto;height:auto" /> Auto Detect</label>
+      </div>
+
+      <div class="row3">
+        <button id="btnPropagate">Propagate Now</button>
+        <button class="success" id="btnDetect">Detect Now</button>
+        <button id="btnRemove">Remove</button>
+      </div>
+
+      <div class="row">
+        <select id="restoreSel"></select>
+        <button id="btnRestore">Restore</button>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Class names (comma separated)</label>
+          <input id="classNames" placeholder="class0,class1,class2" />
+        </div>
+        <div style="display:flex;align-items:end">
+          <button id="btnSaveClasses">Save Classes</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Model</label>
+          <select id="modelSel"></select>
+        </div>
+        <div>
+          <label>Import model path</label>
+          <div class="inline">
+            <input id="modelPath" placeholder="C:/.../model.pt" />
+            <button id="btnBrowseModel">Browse</button>
+          </div>
+        </div>
+      </div>
+      <button id="btnImportModel">Import Model</button>
+
+      <hr />
+
+      <div class="row">
+        <div>
+          <label>Export format</label>
+          <select id="exportFmt">
+            <option>YOLO (.txt)</option>
+            <option>JSON</option>
+          </select>
+        </div>
+        <div>
+          <label>Export folder path</label>
+          <div class="inline">
+            <input id="exportPath" placeholder="C:/.../output" />
+            <button id="btnBrowseExport">Browse</button>
+          </div>
+        </div>
+      </div>
+      <button class="primary" id="btnExport">Export All</button>
+
+      <hr />
+      <div class="status" id="status"></div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
