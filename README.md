@@ -1,33 +1,42 @@
 # AI Labeller Web
 
-A standalone web version of the labeller built with FastAPI + vanilla JS canvas.
+FastAPI + vanilla JS web annotation tool.
 
-Repository:
+## Live App
 
-- `https://github.com/JamesChang666/labeller_web`
+- https://labeller-web.onrender.com/
 
-## What it supports
+No local `uvicorn` command is needed if you use the live URL.
 
-- Open project by folder path (server-local path)
-- Source modes: Images / YOLO dataset / RF-DETR dataset
-- Bounding box draw/select/delete
-- Move selected box by drag
-- Class id editing for selected box
-- Save + Next / Previous
-- Propagate (copy previous image boxes)
-- Auto Detect (YOLO model)
+## Repository
+
+- https://github.com/JamesChang666/labeller_web
+
+## Features
+
+- Open dataset by source mode: Images / YOLO / RF-DETR
+- Draw, move, select, delete boxes
 - Undo / Redo
+- Save + Next / Previous
+- Propagate previous labels
+- Auto Detect (YOLO)
 - Fuse overlapped boxes (same class)
-- Remove current image and restore removed images
+- Remove / Restore images
 - Image dropdown jump
 - Class names load/save
-- Model dropdown library + import model path
 - Clear All
-- Export All as:
-  - `YOLO (.txt)`
-  - `JSON` (full split json files, e.g. `annotations/train.json`)
+- Export all:
+  - YOLO (`.txt`)
+  - JSON (split-level files like `annotations/train.json`)
 
-## Run Local
+## Cloud Usage (Render)
+
+- URL: `https://labeller-web.onrender.com/`
+- Cloud runs in HEADLESS mode.
+- Native OS file/folder dialogs are disabled on cloud.
+- Use server-side paths, or extend with upload/S3.
+
+## Local Development
 
 ```bash
 cd web_labeller
@@ -35,44 +44,16 @@ pip install -r requirements.txt
 uvicorn app:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-Then open:
+Open: `http://127.0.0.1:8000`
 
-- http://127.0.0.1:8000
+## Render Deploy
 
-## Deploy on Render (from GitHub)
+1. New Web Service on Render
+2. Connect `JamesChang666/labeller_web`
+3. Use repo defaults (`render.yaml`)
 
-1. Push this `web_labeller` repo to GitHub.
-2. In Render: `New +` -> `Web Service` -> connect this repo.
-3. Render will detect `render.yaml`.
-4. Deploy.
+If manual settings are needed:
 
-Render start command:
-
-```bash
-uvicorn app:app --host 0.0.0.0 --port $PORT
-```
-
-Environment:
-
-- `HEADLESS=1` on cloud (already configured in `render.yaml`)
-
-## Production URL
-
-After deployment, the URL is on Render, e.g.:
-
-- `https://labeller-web.onrender.com`
-
-Use your actual Render service URL.
-
-Cloud (Render):
-
-- Use your Render URL, e.g. `https://labeller-web.onrender.com`
-- No local `uvicorn` command needed.
-
-## Notes
-
-- This web app reads local folders from the server machine path.
-- On cloud (HEADLESS mode), native Browse dialogs are disabled.
-- In cloud mode, use server-side paths or extend app with upload/S3 storage.
-- For detect, pick/import model in dropdown. If empty, fallback is `yolo26m.pt`.
-- Source mode is dataset type selection, not model file selection.
+- Build: `pip install -r requirements.txt`
+- Start: `uvicorn app:app --host 0.0.0.0 --port $PORT`
+- Env: `HEADLESS=1`
