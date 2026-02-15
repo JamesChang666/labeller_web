@@ -15,8 +15,6 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from PIL import Image
-import tkinter as tk
-from tkinter import filedialog
 
 try:
     from ultralytics import YOLO
@@ -179,6 +177,8 @@ def pick_folder(title: str = "Select Folder") -> dict[str, Any]:
     if HEADLESS:
         raise HTTPException(status_code=400, detail="Folder dialog is disabled on cloud server")
     try:
+        import tkinter as tk
+        from tkinter import filedialog
         root = tk.Tk()
         root.withdraw()
         root.attributes("-topmost", True)
@@ -197,6 +197,8 @@ def pick_file(
     if HEADLESS:
         raise HTTPException(status_code=400, detail="File dialog is disabled on cloud server")
     try:
+        import tkinter as tk
+        from tkinter import filedialog
         if kind == "model":
             filetypes = [
                 ("Model files", "*.pt *.onnx"),
