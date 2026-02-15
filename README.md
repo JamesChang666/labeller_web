@@ -1,6 +1,10 @@
-﻿# AI Labeller Web (new project)
+# AI Labeller Web
 
-A standalone web version of your labeller built with FastAPI + vanilla JS canvas.
+A standalone web version of the labeller built with FastAPI + vanilla JS canvas.
+
+Repository:
+
+- `https://github.com/JamesChang666/labeller_web`
 
 ## What it supports
 
@@ -18,11 +22,12 @@ A standalone web version of your labeller built with FastAPI + vanilla JS canvas
 - Image dropdown jump
 - Class names load/save
 - Model dropdown library + import model path
+- Clear All
 - Export All as:
   - `YOLO (.txt)`
   - `JSON` (full split json files, e.g. `annotations/train.json`)
 
-## Run
+## Run Local
 
 ```bash
 cd web_labeller
@@ -38,19 +43,36 @@ Then open:
 
 1. Push this `web_labeller` repo to GitHub.
 2. In Render: `New +` -> `Web Service` -> connect this repo.
-3. Render can auto-detect `render.yaml` in this repo.
+3. Render will detect `render.yaml`.
 4. Deploy.
 
-Render start command used:
+Render start command:
 
 ```bash
 uvicorn app:app --host 0.0.0.0 --port $PORT
 ```
 
+Environment:
+
+- `HEADLESS=1` on cloud (already configured in `render.yaml`)
+
+## Production URL
+
+After deployment, the URL is on Render, e.g.:
+
+- `https://labeller-web.onrender.com`
+
+Use your actual Render service URL.
+
+Cloud (Render):
+
+- Use your Render URL, e.g. `https://labeller-web.onrender.com`
+- No local `uvicorn` command needed.
+
 ## Notes
 
-- This web app reads local folders from the **server machine** path.
-- You can input paths like `C:/Users/james/Desktop/labeller_test_file/yolo`.
-- For detect, pick/import model in dropdown. If empty, it falls back to `yolo26m.pt`.
-- Source mode is for dataset type selection, not model file selection.
-- On cloud (HEADLESS mode), native `Browse` dialogs are disabled. Use server-side paths or extend app to support upload/S3.
+- This web app reads local folders from the server machine path.
+- On cloud (HEADLESS mode), native Browse dialogs are disabled.
+- In cloud mode, use server-side paths or extend app with upload/S3 storage.
+- For detect, pick/import model in dropdown. If empty, fallback is `yolo26m.pt`.
+- Source mode is dataset type selection, not model file selection.
