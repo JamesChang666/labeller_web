@@ -47,6 +47,20 @@ async function api(path, method = "GET", body = null) {
   return res.json();
 }
 
+async function initSystem() {
+  try {
+    const s = await api("/api/system");
+    if (!s.dialogs_enabled) {
+      $("btnBrowseProject").disabled = true;
+      $("btnBrowseModel").disabled = true;
+      $("btnBrowseExport").disabled = true;
+      setStatus("Cloud mode: browse dialogs disabled. Paste server paths instead.");
+    }
+  } catch (_) {
+    // ignore
+  }
+}
+
 async function browseFolder(title = "Select Folder") {
   const data = await api(`/api/dialog/folder?title=${encodeURIComponent(title)}`);
   return data.path || "";
@@ -551,4 +565,5 @@ $("btnSaveClasses").onclick = () => saveClasses().catch((e) => setStatus(e.messa
 
 refreshModels().catch((e) => setStatus(e.message));
 loadClasses().catch((e) => setStatus(e.message));
+initSystem().catch(() => {});
 setStatus("Ready");

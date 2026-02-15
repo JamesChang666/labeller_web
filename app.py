@@ -152,6 +152,7 @@ class RestoreReq(BaseModel):
 
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
+HEADLESS = os.environ.get("HEADLESS", "0") == "1" or os.environ.get("RENDER", "") == "true"
 
 app = FastAPI(title="AI Labeller Web")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
@@ -168,8 +169,15 @@ def root() -> FileResponse:
     return FileResponse(str(STATIC_DIR / "index.html"))
 
 
+@app.get("/api/system")
+def system_info() -> dict[str, Any]:
+    return {"dialogs_enabled": not HEADLESS}
+
+
 @app.get("/api/dialog/folder")
 def pick_folder(title: str = "Select Folder") -> dict[str, Any]:
+    if HEADLESS:
+        raise HTTPException(status_code=400, detail="Folder dialog is disabled on cloud server")
     try:
         root = tk.Tk()
         root.withdraw()
@@ -186,6 +194,8 @@ def pick_file(
     title: str = "Select File",
     kind: str = "all",  # all | model
 ) -> dict[str, Any]:
+    if HEADLESS:
+        raise HTTPException(status_code=400, detail="File dialog is disabled on cloud server")
     try:
         if kind == "model":
             filetypes = [

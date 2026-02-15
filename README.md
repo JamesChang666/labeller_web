@@ -34,9 +34,23 @@ Then open:
 
 - http://127.0.0.1:8000
 
+## Deploy on Render (from GitHub)
+
+1. Push this `web_labeller` repo to GitHub.
+2. In Render: `New +` -> `Web Service` -> connect this repo.
+3. Render can auto-detect `render.yaml` in this repo.
+4. Deploy.
+
+Render start command used:
+
+```bash
+uvicorn app:app --host 0.0.0.0 --port $PORT
+```
+
 ## Notes
 
 - This web app reads local folders from the **server machine** path.
 - You can input paths like `C:/Users/james/Desktop/labeller_test_file/yolo`.
 - For detect, pick/import model in dropdown. If empty, it falls back to `yolo26m.pt`.
 - Source mode is for dataset type selection, not model file selection.
+- On cloud (HEADLESS mode), native `Browse` dialogs are disabled. Use server-side paths or extend app to support upload/S3.
