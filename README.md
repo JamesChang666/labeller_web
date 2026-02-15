@@ -15,6 +15,7 @@ No local `uvicorn` command is needed if you use the live URL.
 ## Features
 
 - Open dataset by source mode: Images / YOLO / RF-DETR
+- Upload local dataset folder from browser (cloud-safe)
 - Draw, move, select, delete boxes
 - Undo / Redo
 - Save + Next / Previous
@@ -34,7 +35,7 @@ No local `uvicorn` command is needed if you use the live URL.
 - URL: `https://labeller-web.onrender.com/`
 - Cloud runs in HEADLESS mode.
 - Native OS file/folder dialogs are disabled on cloud.
-- Use server-side paths, or extend with upload/S3.
+- Use `Upload Folder` for local files from browser.
 
 ## Local Development
 

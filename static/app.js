@@ -54,11 +54,32 @@ async function initSystem() {
       $("btnBrowseProject").disabled = true;
       $("btnBrowseModel").disabled = true;
       $("btnBrowseExport").disabled = true;
-      setStatus("Cloud mode: browse dialogs disabled. Paste server paths instead.");
+      setStatus("Cloud mode: native browse dialogs disabled. Use Upload Folder.");
     }
   } catch (_) {
     // ignore
   }
+}
+
+async function uploadProjectFiles(mode, files) {
+  const fd = new FormData();
+  fd.append("mode", mode);
+  for (const f of files) {
+    const rel = f.webkitRelativePath || f.name;
+    fd.append("files", f, rel);
+  }
+  const res = await fetch("/api/project/upload", { method: "POST", body: fd });
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      const j = await res.json();
+      detail = j.detail || JSON.stringify(j);
+    } catch {
+      detail = await res.text();
+    }
+    throw new Error(detail || `HTTP ${res.status}`);
+  }
+  return res.json();
 }
 
 async function browseFolder(title = "Select Folder") {
@@ -159,6 +180,10 @@ async function openProject() {
   if (!path) return setStatus("Enter project path first");
   state.mode = $("sourceMode").value;
   const data = await api("/api/project/open", "POST", { path, mode: state.mode });
+  await applyProjectData(data);
+}
+
+async function applyProjectData(data) {
   state.root = data.root;
   state.split = data.split;
   state.images = data.images;
@@ -529,6 +554,23 @@ $("btnBrowseProject").onclick = async () => {
     if (p) $("projectPath").value = p;
   } catch (e) {
     setStatus(e.message);
+  }
+};
+$("btnUploadProject").onclick = () => {
+  $("uploadProjectInput").value = "";
+  $("uploadProjectInput").click();
+};
+$("uploadProjectInput").onchange = async (e) => {
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
+  try {
+    setStatus(`Uploading ${files.length} files...`);
+    const mode = $("sourceMode").value;
+    const data = await uploadProjectFiles(mode, files);
+    await applyProjectData(data);
+    setStatus(`Uploaded and loaded ${files.length} files`);
+  } catch (err) {
+    setStatus(err.message || "Upload failed");
   }
 };
 $("splitSel").onchange = () => changeSplit().catch((e) => setStatus(e.message));

@@ -1,6 +1,6 @@
 ﻿:root { font-family: Segoe UI, Arial, sans-serif; }
 body { margin: 0; background: #f2f4f8; color: #1a1a1a; }
-.topbar { display: grid; grid-template-columns: 1fr auto auto auto auto auto; gap: 8px; padding: 10px; background: #1f2937; color: #fff; align-items: center; }
+.topbar { display: grid; grid-template-columns: 1fr auto auto auto auto auto auto; gap: 8px; padding: 10px; background: #1f2937; color: #fff; align-items: center; }
 .topbar input, .topbar select, .topbar button { height: 34px; border-radius: 6px; border: 1px solid #d0d7de; padding: 0 10px; }
 .topbar button { background: #2563eb; color: #fff; border: none; cursor: pointer; }
 .layout { display: grid; grid-template-columns: 1fr 320px; height: calc(100vh - 54px); }

@@ -5,11 +5,13 @@ import glob
 import json
 import os
 import shutil
+import tempfile
+from uuid import uuid4
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -150,6 +152,7 @@ class RestoreReq(BaseModel):
 
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
+UPLOAD_BASE = Path(tempfile.gettempdir()) / "ai_labeller_uploads"
 HEADLESS = os.environ.get("HEADLESS", "0") == "1" or os.environ.get("RENDER", "") == "true"
 
 app = FastAPI(title="AI Labeller Web")
@@ -233,30 +236,33 @@ def import_model(payload: dict[str, str]) -> dict[str, Any]:
     return {"ok": True, "models": model_library, "selected": path}
 
 
-@app.post("/api/project/open")
-def open_project(req: OpenProjectReq) -> dict[str, Any]:
-    path = norm(req.path)
-    if not os.path.isdir(path):
-        raise HTTPException(status_code=400, detail="Folder not found")
-
+def _open_project_core(path: str, mode: str) -> dict[str, Any]:
     detected_root = yolo_root(path)
-    if req.mode in ("yolo", "rfdetr") and detected_root:
+    if mode in ("yolo", "rfdetr") and detected_root:
         rootp = detected_root
-    elif req.mode in ("yolo", "rfdetr") and os.path.isdir(f"{path}/images"):
+    elif mode in ("yolo", "rfdetr") and os.path.isdir(f"{path}/images"):
         rootp = path
-    elif req.mode == "images" and detected_root:
+    elif mode == "images" and detected_root:
         rootp = detected_root
     else:
         rootp = path
 
     state.root = rootp
-    state.mode = req.mode
+    state.mode = mode
 
     if os.path.isdir(f"{rootp}/images"):
         ensure_labels(rootp)
-        split_files = {s: list_images(f"{rootp}/images/{s}") for s in ("train", "val", "test") if os.path.isdir(f"{rootp}/images/{s}")}
+        split_files = {
+            s: list_images(f"{rootp}/images/{s}")
+            for s in ("train", "val", "test")
+            if os.path.isdir(f"{rootp}/images/{s}")
+        }
         non_empty = [s for s, files in split_files.items() if files]
-        state.split = "train" if "train" in non_empty else (non_empty[0] if non_empty else (next(iter(split_files)) if split_files else "train"))
+        state.split = (
+            "train"
+            if "train" in non_empty
+            else (non_empty[0] if non_empty else (next(iter(split_files)) if split_files else "train"))
+        )
         state.images = split_files.get(state.split, [])
     else:
         state.split = "train"
@@ -271,6 +277,43 @@ def open_project(req: OpenProjectReq) -> dict[str, Any]:
         "count": len(state.images),
         "class_names": class_names,
     }
+
+
+@app.post("/api/project/open")
+def open_project(req: OpenProjectReq) -> dict[str, Any]:
+    path = norm(req.path)
+    if not os.path.isdir(path):
+        raise HTTPException(status_code=400, detail="Folder not found")
+    return _open_project_core(path, req.mode)
+
+
+@app.post("/api/project/upload")
+async def upload_project(
+    mode: str = Form("images"),
+    files: list[UploadFile] = File(...),
+) -> dict[str, Any]:
+    if not files:
+        raise HTTPException(status_code=400, detail="No files uploaded")
+
+    root = UPLOAD_BASE / f"session_{uuid4().hex}"
+    root.mkdir(parents=True, exist_ok=True)
+
+    saved = 0
+    for f in files:
+        name = f.filename or ""
+        rel = name.replace("\\", "/").lstrip("/")
+        if not rel:
+            continue
+        out = root / rel
+        out.parent.mkdir(parents=True, exist_ok=True)
+        data = await f.read()
+        with open(out, "wb") as wf:
+            wf.write(data)
+        saved += 1
+
+    if saved == 0:
+        raise HTTPException(status_code=400, detail="No valid files uploaded")
+    return _open_project_core(norm(str(root)), mode)
 
 
 @app.post("/api/project/split")
