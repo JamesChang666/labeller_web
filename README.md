@@ -16,6 +16,7 @@ No local `uvicorn` command is needed if you use the live URL.
 
 - Open dataset by source mode: Images / YOLO / RF-DETR
 - Upload local dataset folder from browser (cloud-safe)
+- Upload model file from browser (`.pt` / `.onnx`, cloud-safe)
 - Draw, move, select, delete boxes
 - Undo / Redo
 - Save + Next / Previous
@@ -36,6 +37,7 @@ No local `uvicorn` command is needed if you use the live URL.
 - Cloud runs in HEADLESS mode.
 - Native OS file/folder dialogs are disabled on cloud.
 - Use `Upload Folder` for local files from browser.
+- Use `Upload Model` for model files on cloud.
 
 ## Local Development
 

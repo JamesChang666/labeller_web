@@ -231,9 +231,29 @@ def import_model(payload: dict[str, str]) -> dict[str, Any]:
     path = norm(payload.get("path", ""))
     if not os.path.isfile(path):
         raise HTTPException(status_code=400, detail="Model file not found")
+    if not path.lower().endswith((".pt", ".onnx")):
+        raise HTTPException(status_code=400, detail="Only .pt or .onnx model files are supported")
     if path not in model_library:
         model_library.append(path)
     return {"ok": True, "models": model_library, "selected": path}
+
+
+@app.post("/api/models/upload")
+async def upload_model(file: UploadFile = File(...)) -> dict[str, Any]:
+    name = os.path.basename(file.filename or "").strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    if not name.lower().endswith((".pt", ".onnx")):
+        raise HTTPException(status_code=400, detail="Only .pt or .onnx model files are supported")
+    models_dir = UPLOAD_BASE / "models"
+    models_dir.mkdir(parents=True, exist_ok=True)
+    dst = models_dir / f"{uuid4().hex}_{name}"
+    with open(dst, "wb") as wf:
+        wf.write(await file.read())
+    p = norm(str(dst))
+    if p not in model_library:
+        model_library.append(p)
+    return {"ok": True, "models": model_library, "selected": p}
 
 
 def _open_project_core(path: str, mode: str) -> dict[str, Any]:
@@ -303,6 +323,9 @@ async def upload_project(
         name = f.filename or ""
         rel = name.replace("\\", "/").lstrip("/")
         if not rel:
+            continue
+        parts = Path(rel).parts
+        if any(part in ("..", "") for part in parts):
             continue
         out = root / rel
         out.parent.mkdir(parents=True, exist_ok=True)

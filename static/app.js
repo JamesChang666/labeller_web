@@ -446,6 +446,23 @@ async function importModel() {
   $("modelSel").value = data.selected;
 }
 
+async function uploadModelFile(file) {
+  const fd = new FormData();
+  fd.append("file", file, file.name);
+  const res = await fetch("/api/models/upload", { method: "POST", body: fd });
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      const j = await res.json();
+      detail = j.detail || JSON.stringify(j);
+    } catch {
+      detail = await res.text();
+    }
+    throw new Error(detail || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
 canvas.addEventListener("mousedown", (e) => {
   if (!state.img) return;
   const rect = canvas.getBoundingClientRect();
@@ -587,6 +604,22 @@ $("btnRemove").onclick = () => removeCurrentImage().catch((e) => setStatus(e.mes
 $("btnRestore").onclick = () => restoreImage().catch((e) => setStatus(e.message));
 $("btnExport").onclick = () => exportAll().catch((e) => setStatus(e.message));
 $("btnImportModel").onclick = () => importModel().catch((e) => setStatus(e.message));
+$("btnUploadModel").onclick = () => {
+  $("uploadModelInput").value = "";
+  $("uploadModelInput").click();
+};
+$("uploadModelInput").onchange = async (e) => {
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
+  try {
+    const data = await uploadModelFile(files[0]);
+    await refreshModels();
+    $("modelSel").value = data.selected;
+    setStatus(`Model uploaded: ${files[0].name}`);
+  } catch (err) {
+    setStatus(err.message || "Model upload failed");
+  }
+};
 $("btnBrowseModel").onclick = async () => {
   try {
     const p = await browseFile("Select Model File", "model");
